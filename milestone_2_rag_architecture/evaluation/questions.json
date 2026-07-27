@@ -1,0 +1,14 @@
+[
+  {"id": "q01", "question": "What are Northstar's core collaboration hours?", "expected_source_key": "documents/employee_handbook.pdf"},
+  {"id": "q02", "question": "Who approves leave requests longer than five business days?", "expected_source_key": "documents/employee_handbook.pdf"},
+  {"id": "q03", "question": "How quickly must an employee report a lost company device?", "expected_source_key": "documents/employee_handbook.pdf"},
+  {"id": "q04", "question": "What approval is required for an expense above $500?", "expected_source_key": "documents/employee_handbook.pdf"},
+  {"id": "q05", "question": "When is manager approval required for estimated travel costs?", "expected_source_key": "documents/travel_expense_policy.pdf"},
+  {"id": "q06", "question": "What is the hotel reimbursement limit before taxes?", "expected_source_key": "documents/travel_expense_policy.pdf"},
+  {"id": "q07", "question": "When must a travel expense report be submitted?", "expected_source_key": "documents/travel_expense_policy.pdf"},
+  {"id": "q08", "question": "Which expenses are not reimbursable under the travel policy?", "expected_source_key": "documents/travel_expense_policy.pdf"},
+  {"id": "q09", "question": "What should an employee do first after detecting a suspected security incident?", "expected_source_key": "documents/incident_response_guide.pdf"},
+  {"id": "q10", "question": "Who must be informed within one hour of a Severity 1 incident?", "expected_source_key": "documents/incident_response_guide.pdf"},
+  {"id": "q11", "question": "How long does Engineering monitor recovery before an incident can close?", "expected_source_key": "documents/incident_response_guide.pdf"},
+  {"id": "q12", "question": "What must the post-incident review record?", "expected_source_key": "documents/incident_response_guide.pdf"}
+]
