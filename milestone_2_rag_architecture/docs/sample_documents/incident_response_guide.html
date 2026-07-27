@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Northstar Incident Response Guide</title>
+  <style>
+    body { font-family: Arial, sans-serif; line-height: 1.5; margin: 56px; color: #172033; }
+    h1 { color: #8a1c1c; } h2 { color: #ad3030; margin-top: 28px; }
+    .meta { color: #4b5563; } .note { background: #fff0f0; border-left: 4px solid #ad3030; padding: 12px; }
+  </style>
+</head>
+<body>
+  <h1>Northstar Incident Response Guide</h1>
+  <p class="meta">Version 1.3 | Effective date: March 1, 2026 | Owner: Security Operations</p>
+  <h2>Purpose</h2>
+  <p>This guide defines how Northstar detects, contains, communicates, and closes security incidents. It applies to suspected data exposure, compromised accounts, malware, and unauthorized system access.</p>
+  <h2>First Response</h2>
+  <p>Any employee who detects a suspected incident must open a Security incident ticket and notify the on-call Security Operations analyst immediately. Do not delete evidence, restart affected systems, or contact external parties without authorization.</p>
+  <h2>Severity and Escalation</h2>
+  <p>The on-call analyst assigns severity within thirty minutes. A Severity 1 incident affects customer data, production availability, or a regulated system. For Severity 1 incidents, the Incident Commander informs the Chief Information Security Officer and Legal within one hour.</p>
+  <h2>Containment and Recovery</h2>
+  <p>Security Operations isolates affected accounts or hosts. Engineering verifies recovery through monitoring for at least twenty-four hours. The incident may be closed only after the Incident Commander approves the recovery evidence.</p>
+  <h2>Post-Incident Review</h2>
+  <p>Within five business days, the Incident Commander schedules a blameless review. The review records timeline, root cause, customer impact, corrective actions, owners, and due dates.</p>
+  <p class="note">For an active security emergency, contact Security Operations through the on-call channel.</p>
+</body>
+</html>
