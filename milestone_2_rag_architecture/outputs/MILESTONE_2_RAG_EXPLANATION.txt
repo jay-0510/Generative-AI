@@ -1,0 +1,320 @@
+MILESTONE 2: RAG APPLICATION - SIMPLE EXPLANATION
+===================================================
+
+1. ONE-LINE PROJECT EXPLANATION
+-------------------------------
+This project is a document question-answering application. It reads PDF files
+from Amazon S3, stores their meaning in Amazon OpenSearch, and uses Amazon
+Bedrock to answer questions from those PDFs.
+
+In simple words: upload PDFs, ask a question, and get an answer based on the
+uploaded documents instead of a general internet answer.
+
+
+2. WHAT DOES RAG MEAN?
+----------------------
+RAG means Retrieval-Augmented Generation.
+
+It has two important steps:
+1. Retrieval: find the most relevant parts of the uploaded documents.
+2. Generation: give those parts to the AI model so it can write an answer.
+
+This is better than asking an AI model without documents because the answer is
+grounded in our own PDF content. The application also returns the source PDF,
+chunk number, similarity score, and a short excerpt.
+
+
+3. PIPELINE / ARCHITECTURE
+--------------------------
+
+                        INGESTION PIPELINE
+
+PDF files in Amazon S3
+        |
+        v
+PyMuPDF extracts readable text from each PDF
+        |
+        v
+LangChain splits long text into smaller chunks
+        |
+        v
+Amazon Bedrock Titan creates an embedding for every chunk
+        |
+        v
+Amazon OpenSearch Serverless stores text, metadata, and embeddings
+
+
+                        QUESTION-ANSWERING PIPELINE
+
+User asks a question in Streamlit
+        |
+        v
+Streamlit sends POST /ask to FastAPI
+        |
+        v
+Bedrock Titan converts the question into an embedding
+        |
+        v
+OpenSearch finds the most similar PDF chunks
+        |
+        v
+Amazon Bedrock Nova Lite reads the question plus retrieved chunks
+        |
+        v
+FastAPI returns the answer and source details
+        |
+        v
+Streamlit shows the answer and citations to the user
+
+
+4. COMPONENT-BY-COMPONENT EXPLANATION
+-------------------------------------
+
+Amazon S3
+---------
+S3 is the document storage area. The PDF files are uploaded there first.
+The application lists the PDFs under the configured S3 prefix and downloads
+them when ingestion starts.
+
+PyMuPDF
+-------
+PyMuPDF is the PDF reader. It extracts embedded text directly from each PDF.
+We changed the project from Amazon Textract to PyMuPDF because the current
+documents are text-based PDFs and PyMuPDF is simpler, faster, and has no OCR
+service call.
+
+Important limitation: PyMuPDF does not perform OCR. A scanned PDF that only
+contains images will not have readable text. Such a document must be converted
+to a searchable PDF or processed with an OCR tool such as Textract first.
+
+LangChain Chunking
+------------------
+A complete PDF can be too large to send to the model at one time. Therefore,
+LangChain splits the extracted text into smaller pieces called chunks.
+
+Current configuration:
+- Chunk size: 900 characters
+- Chunk overlap: 150 characters
+
+Overlap repeats a small amount of text between adjacent chunks. This prevents
+important meaning from being lost when a sentence lies near a chunk boundary.
+
+Amazon Bedrock Titan Text Embeddings V2
+---------------------------------------
+An embedding is a list of numbers representing the meaning of text. Similar
+meanings are placed close together mathematically.
+
+The project creates embeddings for:
+- Every PDF chunk during ingestion
+- Every user question during retrieval
+
+This lets the system find relevant content even when the user does not use the
+exact same words as the PDF.
+
+Amazon OpenSearch Serverless
+----------------------------
+OpenSearch is the vector database. It stores:
+- The original text chunk
+- The embedding vector
+- S3 bucket and object key
+- Chunk index
+
+When a question arrives, OpenSearch compares its embedding with stored
+embeddings and returns the closest chunks. This is semantic search.
+
+Amazon Bedrock Nova Lite
+------------------------
+Nova Lite is the answer-generation model. It receives only the retrieved text
+chunks and the user question. The prompt instructs it to answer only from that
+context and to say it does not know if the answer is not available.
+
+FastAPI
+-------
+FastAPI is the backend API. Its main endpoint is:
+
+POST /ask
+
+Example request:
+{
+  "question": "What is the Transformer attention mechanism?",
+  "top_k": 4
+}
+
+It returns an answer plus source information. A browser GET request to /ask is
+expected to fail because /ask only accepts POST requests. A log such as
+"POST /ask 200 OK" means the request worked successfully.
+
+Streamlit
+---------
+Streamlit is the user interface. It gives the project a chat-like webpage where
+users can ask questions and see answers with source PDF details.
+
+
+5. WHAT WE IMPLEMENTED IN THIS MILESTONE
+----------------------------------------
+
+1. S3 PDF discovery
+   The application finds PDFs in the configured S3 bucket and prefix.
+
+2. Direct PDF text extraction
+   PyMuPDF downloads and extracts text from each text-based PDF.
+
+3. Text chunking
+   Long PDF text is split into manageable, overlapping chunks.
+
+4. Vector embedding generation
+   Bedrock Titan creates 1024-dimension semantic embeddings.
+
+5. Vector indexing
+   Chunks, metadata, and embeddings are stored in OpenSearch Serverless.
+
+6. Semantic retrieval
+   The application retrieves the chunks most related to the question.
+
+7. Grounded answer generation
+   Bedrock Nova Lite creates an answer from retrieved content only.
+
+8. Source citations
+   The API and UI return the S3 source path, chunk number, score, and excerpt.
+
+9. FastAPI backend and Streamlit frontend
+   The project has both a proper API and a usable chat interface.
+
+10. Tests and evaluation support
+    Offline unit tests validate chunking, extraction, API behavior, RAG flow,
+    and OpenSearch Serverless behavior. A retrieval evaluation script is also
+    included and should be updated to match the currently uploaded PDFs.
+
+
+6. HOW TO DEMONSTRATE THE PROJECT
+---------------------------------
+
+Step 1: Start the API in one terminal.
+
+PYTHONPATH=src .venv/bin/uvicorn rag_app.api:app --reload --port 8000
+
+Step 2: Start Streamlit in another terminal.
+
+.venv/bin/streamlit run streamlit_app.py
+
+Step 3: Open the Streamlit URL shown in the terminal and ask questions about
+the uploaded PDFs.
+
+Good demonstration questions for the current research PDFs:
+- What is the Transformer attention mechanism?
+- What problem does Retrieval-Augmented Generation solve?
+- What is BERT used for?
+- What are the main benefits of LangChain?
+- How does AWS support cloud computing?
+
+Step 4: Point out that the answer includes the source PDF name, chunk number,
+and similarity score. This shows that the answer came from retrieved evidence.
+
+Optional API checks:
+- http://localhost:8000/health
+- http://localhost:8000/docs
+
+
+7. SHORT PRESENTATION SCRIPT
+----------------------------
+
+"This project is a Retrieval-Augmented Generation application built on AWS.
+First, I upload PDF documents to Amazon S3. During ingestion, PyMuPDF extracts
+text from the PDFs. LangChain splits that text into smaller chunks. Amazon
+Bedrock Titan converts every chunk into an embedding, and OpenSearch Serverless
+stores those embeddings for semantic search.
+
+When a user asks a question in Streamlit, the question goes to a FastAPI
+backend. The backend creates an embedding for the question, OpenSearch finds
+the most relevant chunks, and Bedrock Nova Lite generates an answer using only
+those chunks. The user receives both the answer and the supporting PDF sources.
+
+This reduces hallucination because the model is instructed to answer only from
+the retrieved document context."
+
+
+8. TEN TRADE-OFF QUESTIONS WITH ANSWERS
+----------------------------------------
+
+Q1. Why did you use PyMuPDF instead of Amazon Textract?
+Answer: The uploaded files are text-based PDFs. PyMuPDF is faster and simpler
+for extracting embedded text, and it avoids Textract processing cost and job
+polling. The trade-off is that PyMuPDF cannot read image-only scanned PDFs. For
+scanned documents, Textract or another OCR tool would be a better choice.
+
+Q2. Why split a PDF into chunks instead of embedding the whole PDF?
+Answer: Whole PDFs can be too large and contain many unrelated topics. Chunks
+make search more precise and keep the model context small. The trade-off is
+that chunking can split a sentence or idea. We use overlap to reduce this risk.
+
+Q3. Why use a chunk size of 900 characters with 150 characters of overlap?
+Answer: This is a balanced starting point. It is large enough to preserve
+context but small enough to retrieve precise passages. Larger chunks give more
+context but can bring unrelated text. Smaller chunks are more precise but may
+miss the full meaning. These values should be tuned with evaluation questions.
+
+Q4. Why use embeddings and semantic search instead of normal keyword search?
+Answer: Keyword search needs the same words used in the document. Embeddings
+search by meaning, so a question can still find relevant text with different
+wording. The trade-off is that embeddings cost money to create and may return
+meaningfully similar but not exact keyword matches.
+
+Q5. Why use OpenSearch Serverless instead of a normal database?
+Answer: OpenSearch Serverless is built for vector similarity search and AWS
+manages the infrastructure. It is convenient for this prototype. The trade-off
+is less low-level control and some API limitations, such as no client-supplied
+document IDs and no explicit index refresh in this setup.
+
+Q6. Why retrieve only the top K chunks instead of all chunks?
+Answer: Sending every chunk would be slow, expensive, and may confuse the
+model. Top K gives the model the best evidence only. The trade-off is that a
+very small K may miss useful context, while a very large K adds irrelevant
+context. The default is K = 4.
+
+Q7. Why use RAG instead of training or fine-tuning a model on the PDFs?
+Answer: RAG is faster to update. When a document changes, we re-ingest it
+instead of retraining a model. It also provides sources for each answer.
+Fine-tuning can help with behavior or style, but it is more expensive and does
+not automatically provide reliable citations from changing documents.
+
+Q8. How does the project reduce hallucinations?
+Answer: Before generating an answer, the system retrieves relevant chunks from
+the PDFs. The prompt tells the model to use only that context and say it does
+not know when evidence is missing. This reduces hallucinations, but it does not
+guarantee perfection. Retrieval quality and prompt design still matter.
+
+Q9. What is the cost versus quality trade-off in this design?
+Answer: Larger chunks, more retrieved chunks, and stronger models can improve
+answer quality but increase Bedrock cost and response time. Smaller chunks,
+fewer results, and smaller models reduce cost but can reduce answer quality.
+Titan embeddings and Nova Lite provide a practical balance for this milestone.
+
+Q10. What would you improve for a production version?
+Answer: I would add authentication, user access controls, monitoring, logging,
+rate limiting, automatic document-change detection, better evaluation data,
+OCR routing for scanned PDFs, and a cleanup strategy for re-ingested Serverless
+documents. I would also monitor retrieval quality and tune chunk size and top K
+using real user questions.
+
+
+9. CURRENT LIMITATIONS TO STATE HONESTLY
+-----------------------------------------
+
+- The current PyMuPDF path supports text-based PDFs, not scanned image-only
+  PDFs.
+- Re-ingesting the same PDFs into OpenSearch Serverless can create duplicate
+  records because the service generates document IDs.
+- The supplied evaluation questions were written for earlier sample policy
+  PDFs. They should be replaced with questions and expected source keys for the
+  five PDFs currently in S3.
+- RAG reduces hallucination but does not guarantee a correct answer. The user
+  should review the returned sources for important decisions.
+
+
+10. FINAL CONCLUSION
+--------------------
+
+The milestone demonstrates a complete AWS RAG workflow from document storage
+to a working chat user interface. It successfully extracts PDF text, creates
+embeddings, performs semantic retrieval, generates grounded answers, and shows
+the document sources that support those answers.
