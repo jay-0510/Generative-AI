@@ -1,0 +1,47 @@
+# docker-compose.yml
+# -------------------
+# Containerizes the project so it can run without a locally-installed
+# Python environment -- useful for grading/review, or for running main.py
+# on a machine you don't want to install dependencies on directly.
+#
+# WHY A SINGLE SERVICE, NO DATABASE CONTAINER
+#   This project's "database" is a local SQLite file (config/db_init.py
+#   creates it on first run) and its vector store is an in-memory FAISS
+#   index rebuilt from data/sample_docs/ each run -- neither needs its own
+#   container or persistent volume the way a real Postgres/Redis service
+#   would. The only external dependencies are network calls to AWS
+#   Bedrock, which just need credentials (via env_file), not a service to
+#   spin up here.
+#
+# TWO WAYS TO USE THIS:
+#   docker compose up notebook   -> Jupyter Lab at http://localhost:8888
+#   docker compose run --rm app  -> runs main.py once and exits
+#
+# Both services share the same image/build; only the startup command
+# differs.
+
+services:
+  app:
+    image: python:3.11-slim
+    working_dir: /workspace
+    volumes:
+      - .:/workspace
+    env_file:
+      - .env
+    command: >
+      bash -c "pip install --no-cache-dir -r requirements.txt &&
+               python main.py"
+
+  notebook:
+    image: python:3.11-slim
+    working_dir: /workspace
+    volumes:
+      - .:/workspace
+    env_file:
+      - .env
+    ports:
+      - "8888:8888"
+    command: >
+      bash -c "pip install --no-cache-dir -r requirements.txt &&
+               jupyter notebook --ip=0.0.0.0 --port=8888 --no-browser --allow-root
+               --notebook-dir=/workspace/notebooks"

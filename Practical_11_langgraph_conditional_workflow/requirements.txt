@@ -1,0 +1,44 @@
+# Core LangChain (v1+) — message primitives, document/text splitting
+# utilities, and the vector store the agents call into.
+langchain>=1.0.0
+langchain-core>=1.0.0
+langchain-community>=0.4.0
+langchain-text-splitters>=0.3.0
+
+# LLM + embeddings provider: Amazon Bedrock only (Nova for chat, Titan for
+# embeddings) — no OpenAI/Google/Anthropic calls anywhere in this project,
+# per this practical's requirement. See src/llm_invoke.py.
+langchain-aws>=0.2.0
+boto3>=1.35.0
+
+# LangGraph — the StateGraph / conditional-edge workflow engine
+# (src/graph/workflow.py).
+langgraph>=1.0.0
+
+# Local, in-memory vector store used by the RAG agent path
+faiss-cpu>=1.8.0
+
+# Loads AWS credentials from a local .env file instead of hardcoding them
+python-dotenv>=1.0.0
+
+# Notebook runtime
+jupyter>=1.0.0
+ipykernel>=6.29.0
+
+# Test suite (see tests/) — everything in tests/ runs fully offline
+pytest>=8.0.0
+
+# Note: sqlite3 (used by the SQL agent path) is part of the Python standard
+# library — no separate install needed.
+
+# --- Optional: local graph-diagram rendering ---
+# graph_workflow.png (already included in this repo) was generated with
+# .get_graph().draw_png(), which needs the `pygraphviz` package PLUS the
+# system `graphviz` library. This is deliberately NOT a hard requirement
+# above, since pygraphviz can be finicky to install on some platforms
+# (notably Windows), and the notebook already falls back gracefully to
+# draw_mermaid_png() or plain draw_mermaid() text if it isn't installed.
+# To render your own copy:
+#   Debian/Ubuntu: sudo apt-get install graphviz libgraphviz-dev pkg-config
+#   macOS:         brew install graphviz
+#   then:          pip install pygraphviz
