@@ -1,0 +1,65 @@
+# ---------------------------------------------------------------------------
+# Secrets — never commit real credentials
+# ---------------------------------------------------------------------------
+.env
+.env.*
+!.env.example
+
+# ---------------------------------------------------------------------------
+# Python
+# ---------------------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+build/
+dist/
+.Python
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Test / coverage artifacts
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.mypy_cache/
+.ruff_cache/
+
+# ---------------------------------------------------------------------------
+# Jupyter
+# ---------------------------------------------------------------------------
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# ---------------------------------------------------------------------------
+# Project data stores — generated at runtime by config/db_init.py, never
+# hand-authored, and can contain locally-seeded data you don't want in git
+# ---------------------------------------------------------------------------
+data/
+*.db
+*.sqlite
+*.sqlite3
+chroma/
+
+# ---------------------------------------------------------------------------
+# Docker / LangFuse self-host volumes (if you ever bind-mount instead of
+# using named volumes, generated container state should never be committed)
+# ---------------------------------------------------------------------------
+docker-data/
+volumes/
+
+# ---------------------------------------------------------------------------
+# Editors / OS cruft
+# ---------------------------------------------------------------------------
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
