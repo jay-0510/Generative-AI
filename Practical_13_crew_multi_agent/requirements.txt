@@ -1,0 +1,13 @@
+# CrewAI itself (Agent/Task/Crew/Process, the YAML @CrewBase project
+# pattern used in src/main.py, and the LLM class used to talk to Bedrock
+# via LiteLLM under the hood). Already pulls in pyyaml (for config/*.yaml)
+# and python-dotenv as transitive dependencies.
+crewai>=1.0.0
+
+# The AWS SDK for Python -- what LiteLLM's Bedrock integration actually
+# uses to authenticate and call the Converse API. Needed explicitly (not
+# just transitively) so a fresh install reliably has it.
+boto3>=1.35.0
+
+# Loads AWS credentials from a local .env file instead of hardcoding them
+python-dotenv>=1.0.0
