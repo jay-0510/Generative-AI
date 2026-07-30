@@ -1,0 +1,3 @@
+This folder accumulates a timestamped markdown copy of every crew run (see src/main.py's main()).
+Individual run files are gitignored (outputs/*.md) since they're just local history --
+this placeholder keeps the empty folder itself tracked in git.

@@ -1,0 +1,53 @@
+# src/config/tasks.yaml
+# -----------------------
+# Declarative task definitions. Each top-level key becomes a Task, built
+# in src/main.py via:
+#   Task(config=self.tasks_config["<key>"], agent=<matching agent>)
+#
+# WHY NO `context:` LINKING THE TWO TASKS TOGETHER
+#   CrewAI lets one task's prompt automatically include a previous task's
+#   output via `context: [other_task]`. We deliberately don't use that
+#   here -- the football commentary and the Karan Aujla biography are on
+#   fully independent topics, so passing one into the other's prompt
+#   would just add irrelevant noise (and cost) rather than useful context.
+#   Process.sequential (set in src/main.py) still runs them in a fixed
+#   order; they just don't read each other's output.
+#
+# WHY output_file ISN'T SET HERE
+#   CrewAI supports a task-level `output_file:` that writes ONLY that
+#   task's own output to disk. Since this project's deliverable is ONE
+#   combined research_output.md containing BOTH agents' work, src/main.py
+#   builds that file itself from both tasks' results after the crew
+#   finishes, instead of relying on per-task file output.
+
+football_commentary_task:
+  description: >
+    Write a dramatic, Peter-Drury-style commentary piece (350-500 words)
+    celebrating Cristiano Ronaldo and Lionel Messi. Cover: their rise to
+    global stardom, defining career achievements (Ballon d'Or count,
+    World Cup and Champions League moments, major club trophies), their
+    contrasting styles, and their shared legacy as two of the greatest
+    players of all time. Use vivid, theatrical language true to Drury's
+    commentary style, but remain accurate about real, well-known career
+    facts -- never invent statistics or honors.
+  expected_output: >
+    A markdown section starting with the heading
+    "## The Duel of Titans: Ronaldo & Messi", followed by 350-500 words
+    of dramatic commentary prose.
+  agent: football_commentator
+
+singer_biography_task:
+  description: >
+    Research and produce a structured summary of Punjabi singer, rapper,
+    and songwriter Karan Aujla's career. Include: early life and
+    songwriting beginnings, his breakthrough as a performer, notable
+    albums and singles, his musical style, awards and recognitions, and
+    his current standing in the Punjabi and global music industry. Stick
+    to widely-corroborated facts.
+  expected_output: >
+    A markdown section starting with the heading
+    "## Karan Aujla: Career Summary", followed by clear subheadings
+    (Early Life & Songwriting Beginnings, Breakthrough, Discography
+    Highlights, Musical Style, Achievements & Recognition, Current
+    Status), written factually and concisely.
+  agent: singer_biographer
